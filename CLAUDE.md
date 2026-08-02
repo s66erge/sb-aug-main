@@ -1,6 +1,6 @@
 ## Commands
 
-- Dev mode: `uv run --env-file .env second_brain`
+- Dev mode: `uv run --env-file .env secondbrain`
 
 ## Workflow
 
@@ -11,7 +11,9 @@
 
 ## Notes
 
-- pytest-env auto-loads `.env.test` — don't set `LOG_LEVEL` manually in tests.
+- Test env comes from the autouse fixtures in `tests/conftest.py` (`LOG_FILE`,
+  `SECONDBRAIN_DIR`), not from a file — `[tool.pytest_env]` names `.env.test`, but it
+  is gitignored and absent. Use `monkeypatch.setenv` rather than editing config.
 - Google-style docstrings (used by `mkdocstrings` for API docs).
 - Docs server logs: `mkdocs.log` (written by `scripts/serve_docs.py`). Check when debugging docs issues.
 - Never start long-running servers (e.g., `serve_docs.py`, `mkdocs serve`). Use `uv run mkdocs build` to verify docs compile.
