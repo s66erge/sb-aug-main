@@ -1,0 +1,848 @@
+<title>secondbrain — a visual tour</title>
+<style>
+  :root{
+    --paper:#efeef4;
+    --paper-2:#e4e2ec;
+    --ink:#191828;
+    --ink-soft:#565375;
+    --ink-faint:#8b88a8;
+    --rule:#cfccdd;
+    --pink:#e0357d;
+    --pink-soft:#f0428c;
+    --aqua:#0d8f9e;
+    --yellow:#e0af00;
+    --card:#f8f7fb;
+    --shadow:rgba(25,24,40,.14);
+    --blend:multiply;
+
+    --mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", "Menlo", "Consolas", "DejaVu Sans Mono", monospace;
+    --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, "Source Serif 4", Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+
+    --step-0:1rem;
+    --step-1:1.2rem;
+    --step-2:1.55rem;
+    --step-3:2.1rem;
+    --step-4:clamp(2.6rem,7vw,4.6rem);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#16151f;
+      --paper-2:#1d1c29;
+      --ink:#edecf2;
+      --ink-soft:#a29fbd;
+      --ink-faint:#726f90;
+      --rule:#332f45;
+      --pink:#ff6ba8;
+      --pink-soft:#ff8dbd;
+      --aqua:#3ed0df;
+      --yellow:#ffd24d;
+      --card:#1e1d2b;
+      --shadow:rgba(0,0,0,.5);
+      --blend:screen;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#16151f;
+    --paper-2:#1d1c29;
+    --ink:#edecf2;
+    --ink-soft:#a29fbd;
+    --ink-faint:#726f90;
+    --rule:#332f45;
+    --pink:#ff6ba8;
+    --pink-soft:#ff8dbd;
+    --aqua:#3ed0df;
+    --yellow:#ffd24d;
+    --card:#1e1d2b;
+    --shadow:rgba(0,0,0,.5);
+    --blend:screen;
+  }
+  :root[data-theme="light"]{
+    --paper:#efeef4;
+    --paper-2:#e4e2ec;
+    --ink:#191828;
+    --ink-soft:#565375;
+    --ink-faint:#8b88a8;
+    --rule:#cfccdd;
+    --pink:#e0357d;
+    --pink-soft:#f0428c;
+    --aqua:#0d8f9e;
+    --yellow:#e0af00;
+    --card:#f8f7fb;
+    --shadow:rgba(25,24,40,.14);
+    --blend:multiply;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--serif);
+    font-size:var(--step-0);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* paper grain */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:99;
+    opacity:.5;
+    mix-blend-mode:var(--blend);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.32'/%3E%3C/svg%3E");
+  }
+
+  .wrap{width:min(1080px,92vw);margin:0 auto}
+  section{padding-block:clamp(3rem,7vw,5.5rem)}
+
+  /* ---------- shared type ---------- */
+  .eyebrow{
+    font-family:var(--sans);
+    font-size:.7rem;
+    font-weight:700;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    margin:0 0 .9rem;
+  }
+  h1,h2,h3{font-family:var(--mono);font-weight:700;text-wrap:balance;margin:0}
+  h2{
+    font-size:var(--step-3);
+    letter-spacing:-.02em;
+    text-transform:lowercase;
+  }
+  h2 .tick{color:var(--pink)}
+  h3{font-size:var(--step-1);letter-spacing:-.01em}
+  p{margin:0 0 1rem;max-width:64ch}
+  .lede{font-size:var(--step-1);color:var(--ink-soft)}
+  code,kbd{font-family:var(--mono);font-size:.9em}
+  a{color:var(--pink);text-decoration-thickness:1px;text-underline-offset:3px}
+  :focus-visible{outline:2.5px solid var(--aqua);outline-offset:3px;border-radius:2px}
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;
+    padding-block:clamp(3.5rem,9vw,7rem) clamp(2.5rem,5vw,4rem);
+    overflow:hidden;
+  }
+  .blob{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(46px);
+    opacity:.5;
+    mix-blend-mode:var(--blend);
+    pointer-events:none;
+  }
+  .blob.a{width:34vw;height:34vw;background:var(--pink-soft);top:-8vw;right:-6vw}
+  .blob.b{width:26vw;height:26vw;background:var(--aqua);top:14vw;right:16vw}
+  .hero-inner{position:relative;z-index:1}
+  .wordmark{
+    font-family:var(--mono);
+    font-weight:700;
+    font-size:var(--step-4);
+    line-height:.92;
+    letter-spacing:-.045em;
+    margin:0 0 1.2rem;
+  }
+  .wordmark .half{color:var(--pink)}
+  .hero .lede{max-width:52ch;font-size:clamp(1.1rem,2.4vw,1.4rem)}
+  .hero-meta{
+    display:flex;flex-wrap:wrap;gap:.5rem;
+    margin-top:1.6rem;
+  }
+  .chip{
+    font-family:var(--sans);
+    font-size:.72rem;
+    font-weight:600;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    padding:.34rem .66rem;
+    border:1.5px solid var(--rule);
+    border-radius:999px;
+    color:var(--ink-soft);
+  }
+  .chip b{color:var(--ink);font-weight:700}
+
+  /* ---------- slug machine ---------- */
+  .machine{
+    margin-top:clamp(2rem,4vw,3rem);
+    border:2px solid var(--ink);
+    border-radius:6px;
+    background:var(--card);
+    box-shadow:6px 6px 0 var(--pink);
+    overflow:hidden;
+  }
+  .machine-head{
+    display:flex;align-items:center;gap:.6rem;
+    padding:.55rem .9rem;
+    border-bottom:2px solid var(--ink);
+    background:var(--paper-2);
+    font-family:var(--sans);
+    font-size:.72rem;font-weight:700;
+    letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  .dot{width:.6rem;height:.6rem;border-radius:50%;background:var(--pink)}
+  .machine-body{padding:clamp(1.1rem,3vw,1.8rem)}
+  .machine label{
+    display:block;
+    font-family:var(--sans);
+    font-size:.72rem;font-weight:700;
+    letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink-faint);
+    margin-bottom:.5rem;
+  }
+  .prompt-row{display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap}
+  .prompt-row .sigil{font-family:var(--mono);color:var(--aqua);font-weight:700;white-space:nowrap}
+  #titleInput{
+    flex:1 1 14rem;
+    min-width:0;
+    font-family:var(--mono);
+    font-size:var(--step-1);
+    color:var(--ink);
+    background:transparent;
+    border:0;
+    border-bottom:2px dashed var(--rule);
+    padding:.25rem 0;
+  }
+  #titleInput:focus{outline:none;border-bottom-color:var(--aqua)}
+  .pipeline{
+    display:grid;
+    gap:.15rem;
+    margin-top:1.5rem;
+    font-family:var(--mono);
+    font-size:.9rem;
+  }
+  .stage{
+    display:grid;
+    grid-template-columns:minmax(8.5rem,auto) 1fr;
+    gap:.4rem 1rem;
+    align-items:baseline;
+    padding:.5rem .1rem;
+    border-top:1px solid var(--rule);
+  }
+  .stage-name{
+    font-family:var(--sans);
+    font-size:.68rem;font-weight:700;
+    letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-faint);
+  }
+  .stage-val{word-break:break-all;color:var(--ink-soft)}
+  .stage-val em{font-style:normal;color:var(--ink)}
+  .stage.final{border-top:2px solid var(--ink);margin-top:.4rem;padding-top:.8rem}
+  .stage.final .stage-val{
+    color:var(--ink);
+    font-weight:700;
+    font-size:1.05rem;
+    background:linear-gradient(transparent 62%, var(--yellow) 62%);
+    display:inline;
+    box-decoration-break:clone;
+    -webkit-box-decoration-break:clone;
+  }
+  .hint{font-family:var(--sans);font-size:.78rem;color:var(--ink-faint);margin:.9rem 0 0}
+  .hint button{
+    font:inherit;font-weight:600;
+    background:none;border:0;padding:0 .1rem;
+    color:var(--pink);cursor:pointer;
+    text-decoration:underline;text-underline-offset:3px;
+  }
+
+  /* ---------- flow ---------- */
+  .flow{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));
+    gap:.9rem;
+    margin-top:1.6rem;
+    align-items:stretch;
+  }
+  .flow-step{
+    border:1.5px solid var(--rule);
+    border-radius:5px;
+    background:var(--card);
+    padding:.9rem 1rem;
+    position:relative;
+  }
+  .flow-step .num{
+    font-family:var(--sans);font-size:.65rem;font-weight:700;
+    letter-spacing:.16em;color:var(--pink);text-transform:uppercase;
+  }
+  .flow-step .what{font-family:var(--mono);font-weight:700;font-size:.95rem;display:block;margin:.25rem 0 .3rem}
+  .flow-step .why{font-size:.85rem;color:var(--ink-soft);line-height:1.45}
+
+  /* ---------- command cards ---------- */
+  .cmds{display:grid;gap:1.4rem;margin-top:2rem}
+  @media(min-width:800px){.cmds{grid-template-columns:repeat(3,1fr)}}
+  .cmd{
+    border:2px solid var(--ink);
+    border-radius:6px;
+    background:var(--card);
+    display:flex;flex-direction:column;
+    overflow:hidden;
+    box-shadow:5px 5px 0 var(--shadow);
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .cmd:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 var(--accent,var(--aqua))}
+  .cmd[data-accent="pink"]{--accent:var(--pink)}
+  .cmd[data-accent="aqua"]{--accent:var(--aqua)}
+  .cmd[data-accent="yellow"]{--accent:var(--yellow)}
+  .cmd-top{
+    padding:1rem 1.1rem .8rem;
+    border-bottom:2px solid var(--ink);
+    background:color-mix(in srgb, var(--accent) 13%, transparent);
+  }
+  .cmd-name{font-family:var(--mono);font-size:var(--step-2);font-weight:700;letter-spacing:-.02em}
+  .cmd-name .arg{color:var(--ink-faint);font-size:.62em;letter-spacing:0}
+  .cmd-top p{font-size:.88rem;color:var(--ink-soft);margin:.3rem 0 0;font-family:var(--sans);line-height:1.45}
+  .cmd-art{
+    padding:1.1rem;
+    min-height:8.5rem;
+    display:flex;align-items:center;justify-content:center;
+    border-bottom:1.5px dashed var(--rule);
+  }
+  .cmd-foot{padding:.9rem 1.1rem 1.1rem}
+  .cmd-foot .eyebrow{margin-bottom:.5rem;font-size:.64rem}
+  pre{
+    margin:0;
+    font-family:var(--mono);
+    font-size:.76rem;
+    line-height:1.55;
+    color:var(--ink-soft);
+    overflow-x:auto;
+    white-space:pre;
+  }
+  pre b{color:var(--ink);font-weight:700}
+  pre .c{color:var(--aqua)}
+
+  /* mini art */
+  .art-note{
+    width:100%;
+    border:1.5px solid var(--ink);
+    border-radius:3px;
+    background:var(--paper);
+    padding:.6rem .7rem;
+    font-family:var(--mono);
+    font-size:.72rem;
+    line-height:1.5;
+    box-shadow:3px 3px 0 var(--accent);
+  }
+  .art-note .h{font-weight:700;font-size:.85rem;display:block;margin-bottom:.3rem}
+  .art-note .ts{color:var(--ink-faint)}
+  .art-stack{width:100%;display:grid;gap:.34rem;font-family:var(--mono);font-size:.74rem}
+  .art-stack .row{
+    display:flex;gap:.5rem;align-items:baseline;
+    border:1.5px solid var(--rule);border-radius:3px;
+    padding:.3rem .5rem;background:var(--paper);
+  }
+  .art-stack .row:first-child{border-color:var(--ink);box-shadow:2px 2px 0 var(--accent)}
+  .art-stack .n{color:var(--pink);font-weight:700}
+  .art-stack .f{color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .art-pick{width:100%;display:grid;gap:.5rem;justify-items:center;font-family:var(--mono)}
+  .art-pick .big{
+    font-size:2.6rem;font-weight:700;line-height:1;
+    color:var(--ink);
+    border:2px solid var(--ink);border-radius:5px;
+    padding:.3rem .9rem;
+    background:var(--paper);
+    box-shadow:4px 4px 0 var(--accent);
+  }
+  .art-pick .cap{font-family:var(--sans);font-size:.72rem;color:var(--ink-faint);letter-spacing:.08em;text-transform:uppercase}
+
+  /* ---------- env knobs ---------- */
+  .knobs{display:grid;gap:1rem;margin-top:1.8rem}
+  @media(min-width:760px){.knobs{grid-template-columns:repeat(3,1fr)}}
+  .knob{
+    border-left:4px solid var(--k,var(--aqua));
+    background:var(--card);
+    border-radius:0 5px 5px 0;
+    padding:1rem 1.1rem;
+  }
+  .knob:nth-child(1){--k:var(--aqua)}
+  .knob:nth-child(2){--k:var(--yellow)}
+  .knob:nth-child(3){--k:var(--pink)}
+  .knob .var{font-family:var(--mono);font-weight:700;font-size:.95rem;display:block}
+  .knob .def{
+    font-family:var(--sans);font-size:.68rem;font-weight:700;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);
+    display:block;margin:.3rem 0 .5rem;
+  }
+  .knob p{font-size:.87rem;color:var(--ink-soft);margin:0;line-height:1.5}
+
+  .callout{
+    margin-top:1.6rem;
+    border:1.5px dashed var(--rule);
+    border-radius:5px;
+    padding:1rem 1.1rem;
+    background:var(--card);
+    font-size:.9rem;
+    color:var(--ink-soft);
+  }
+  .callout b{color:var(--ink)}
+
+  /* ---------- file explorer ---------- */
+  .explorer{
+    margin-top:2rem;
+    display:grid;
+    gap:1.2rem;
+    align-items:start;
+  }
+  @media(min-width:860px){.explorer{grid-template-columns:minmax(17rem,.85fr) 1.15fr}}
+  .tree{
+    border:2px solid var(--ink);
+    border-radius:6px;
+    background:var(--card);
+    padding:.85rem;
+    font-family:var(--mono);
+    font-size:.88rem;
+    box-shadow:5px 5px 0 var(--shadow);
+  }
+  .tree-root{
+    display:flex;align-items:center;gap:.45rem;
+    padding:.2rem .35rem .5rem;
+    color:var(--ink-faint);
+    font-size:.82rem;
+    letter-spacing:.02em;
+  }
+  .tree ul{list-style:none;margin:0;padding:0 0 0 .35rem}
+  .tree li{position:relative;padding-left:1.1rem}
+  .tree li::before{
+    content:"";position:absolute;left:.1rem;top:0;bottom:0;
+    border-left:1.5px solid var(--rule);
+  }
+  .tree li:last-child::before{bottom:auto;height:1.15rem}
+  .tree li::after{
+    content:"";position:absolute;left:.1rem;top:1.15rem;width:.65rem;
+    border-top:1.5px solid var(--rule);
+  }
+  .file{
+    display:flex;align-items:center;gap:.5rem;width:100%;
+    font:inherit;text-align:left;
+    background:none;border:1.5px solid transparent;border-radius:4px;
+    padding:.38rem .5rem;
+    color:var(--ink);cursor:pointer;
+    transition:background .15s ease, border-color .15s ease;
+  }
+  .file:hover{background:color-mix(in srgb, var(--fc) 14%, transparent)}
+  .file[aria-selected="true"]{
+    border-color:var(--fc);
+    background:color-mix(in srgb, var(--fc) 18%, transparent);
+    font-weight:700;
+  }
+  .file .ico{
+    flex:none;width:1.45rem;height:1.45rem;
+    display:grid;place-items:center;
+    border-radius:4px;
+    background:var(--fc);
+    color:var(--paper);
+    font-family:var(--sans);font-size:.62rem;font-weight:800;letter-spacing:.02em;
+  }
+  .file .lines{margin-left:auto;font-size:.7rem;color:var(--ink-faint);font-weight:400}
+
+  .detail{
+    border:2px solid var(--ink);
+    border-radius:6px;
+    background:var(--card);
+    padding:clamp(1.1rem,3vw,1.6rem);
+    box-shadow:5px 5px 0 var(--dc,var(--aqua));
+    min-height:20rem;
+  }
+  .detail-head{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin-bottom:.2rem}
+  .detail-head h3{font-size:var(--step-2)}
+  .badge{
+    font-family:var(--sans);font-size:.65rem;font-weight:800;
+    letter-spacing:.12em;text-transform:uppercase;
+    padding:.26rem .55rem;border-radius:999px;
+    background:var(--dc);color:var(--paper);
+  }
+  .detail .role{
+    font-family:var(--sans);font-size:.72rem;font-weight:700;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);
+    margin:0 0 1rem;
+  }
+  .detail .blurb{font-size:1.02rem;line-height:1.65}
+  .symbols{list-style:none;margin:1.2rem 0 0;padding:0;display:grid;gap:.5rem}
+  .symbols li{
+    display:grid;grid-template-columns:auto 1fr;gap:.2rem .7rem;
+    border-top:1px solid var(--rule);padding-top:.5rem;
+  }
+  .symbols .sym{font-family:var(--mono);font-weight:700;font-size:.85rem;color:var(--ink)}
+  .symbols .desc{font-size:.85rem;color:var(--ink-soft);line-height:1.5;grid-column:1/-1}
+  @media(min-width:520px){
+    .symbols li{grid-template-columns:minmax(9rem,auto) 1fr}
+    .symbols .desc{grid-column:2}
+  }
+
+  /* ---------- footer ---------- */
+  footer{
+    border-top:2px solid var(--ink);
+    padding-block:clamp(2.2rem,5vw,3.4rem);
+    margin-top:2rem;
+  }
+  .runs{display:grid;gap:.55rem;margin-top:1.2rem}
+  .run{
+    display:flex;gap:.7rem;align-items:baseline;
+    font-family:var(--mono);font-size:.86rem;
+    border-bottom:1px solid var(--rule);padding-bottom:.5rem;
+  }
+  .run .s{color:var(--aqua);font-weight:700}
+  .run .d{margin-left:auto;font-family:var(--sans);font-size:.75rem;color:var(--ink-faint);text-align:right}
+  .sig{margin-top:2rem;font-family:var(--sans);font-size:.75rem;color:var(--ink-faint)}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.01ms !important;transition-duration:.01ms !important}
+  }
+</style>
+
+<header class="hero">
+  <div class="blob a"></div>
+  <div class="blob b"></div>
+  <div class="wrap hero-inner">
+    <p class="eyebrow">A command-line tour · v0.0.1</p>
+    <h1 class="wordmark">second<span class="half">brain</span></h1>
+    <p class="lede">You have a thought. You type it. It becomes a dated markdown file on your own disk — and that&rsquo;s the whole app. Three commands, no database, no cloud, nothing to log into.</p>
+    <div class="hero-meta">
+      <span class="chip"><b>3</b> commands</span>
+      <span class="chip"><b>5</b> source files</span>
+      <span class="chip"><b>228</b> lines of Python</span>
+      <span class="chip">stores <b>.md</b> files</span>
+    </div>
+
+    <div class="machine">
+      <div class="machine-head"><span class="dot"></span> the note machine — try it</div>
+      <div class="machine-body">
+        <label for="titleInput">Type a thought</label>
+        <div class="prompt-row">
+          <span class="sigil">$ secondbrain new</span>
+          <input id="titleInput" type="text" value="Café ideas for Monday!" autocomplete="off" spellcheck="false" />
+        </div>
+
+        <div class="pipeline">
+          <div class="stage">
+            <span class="stage-name">1 · fold accents</span>
+            <span class="stage-val" id="s1"></span>
+          </div>
+          <div class="stage">
+            <span class="stage-name">2 · lowercase</span>
+            <span class="stage-val" id="s2"></span>
+          </div>
+          <div class="stage">
+            <span class="stage-name">3 · drop punctuation</span>
+            <span class="stage-val" id="s3"></span>
+          </div>
+          <div class="stage">
+            <span class="stage-name">4 · spaces → dashes</span>
+            <span class="stage-val" id="s4"></span>
+          </div>
+          <div class="stage final">
+            <span class="stage-name">the file you get</span>
+            <span><span class="stage-val" id="s5"></span></span>
+          </div>
+        </div>
+        <p class="hint">Accents fold to plain letters, but other scripts survive intact — try
+          <button type="button" data-try="日本 notes">日本 notes</button>,
+          <button type="button" data-try="!!!">!!!</button>, or
+          <button type="button" data-try="Über größe Ideen">Über größe Ideen</button>.
+        </p>
+      </div>
+    </div>
+
+    <div class="flow">
+      <div class="flow-step">
+        <span class="num">you type</span>
+        <span class="what">cli.py</span>
+        <span class="why">Click parses the command and turns on logging.</span>
+      </div>
+      <div class="flow-step">
+        <span class="num">it asks</span>
+        <span class="what">notes.py</span>
+        <span class="why">Slugifies the title and picks a free filename.</span>
+      </div>
+      <div class="flow-step">
+        <span class="num">it writes</span>
+        <span class="what">~/secondbrain/</span>
+        <span class="why">One plain markdown file per note. Yours forever.</span>
+      </div>
+      <div class="flow-step">
+        <span class="num">meanwhile</span>
+        <span class="what">app.py</span>
+        <span class="why">Narrates it all to stderr and a rotating log file.</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="wrap">
+  <p class="eyebrow">What you can type</p>
+  <h2>three commands<span class="tick">.</span> that&rsquo;s the whole surface area<span class="tick">.</span></h2>
+  <p class="lede">Every one of them is discoverable with <code>--help</code>. There are no flags to memorise, no config file to write.</p>
+
+  <div class="cmds">
+    <article class="cmd" data-accent="pink">
+      <div class="cmd-top">
+        <div class="cmd-name">new <span class="arg">TITLE</span></div>
+        <p>Capture a thought. Prints the path of the file it just made.</p>
+      </div>
+      <div class="cmd-art">
+        <div class="art-note">
+          <span class="h"># Café ideas for Monday!</span>
+          <span class="ts">2026-08-02T09:14:07</span>
+        </div>
+      </div>
+      <div class="cmd-foot">
+        <p class="eyebrow">secondbrain new --help</p>
+<pre><b>Usage:</b> secondbrain new [OPTIONS] TITLE
+
+  Create a new note with the
+  given TITLE.
+
+<b>Options:</b>
+  <span class="c">--help</span>  Show this message and exit.</pre>
+      </div>
+    </article>
+
+    <article class="cmd" data-accent="aqua">
+      <div class="cmd-top">
+        <div class="cmd-name">list</div>
+        <p>See everything you&rsquo;ve captured, newest first, numbered for you.</p>
+      </div>
+      <div class="cmd-art">
+        <div class="art-stack">
+          <div class="row"><span class="n">1.</span><span class="f">2026-08-02-cafe-ideas…</span></div>
+          <div class="row"><span class="n">2.</span><span class="f">2026-08-01-rewrite-the…</span></div>
+          <div class="row"><span class="n">3.</span><span class="f">2026-07-28-日本-notes.md</span></div>
+        </div>
+      </div>
+      <div class="cmd-foot">
+        <p class="eyebrow">secondbrain list --help</p>
+<pre><b>Usage:</b> secondbrain list [OPTIONS]
+
+  List all notes in the notes
+  directory.
+
+<b>Options:</b>
+  <span class="c">--help</span>  Show this message and exit.</pre>
+      </div>
+    </article>
+
+    <article class="cmd" data-accent="yellow">
+      <div class="cmd-top">
+        <div class="cmd-name">show <span class="arg">NUMBER</span></div>
+        <p>Print a note. The number is the one <code>list</code> just showed you.</p>
+      </div>
+      <div class="cmd-art">
+        <div class="art-pick">
+          <span class="big">2</span>
+          <span class="cap">from the list ↑</span>
+        </div>
+      </div>
+      <div class="cmd-foot">
+        <p class="eyebrow">secondbrain show --help</p>
+<pre><b>Usage:</b> secondbrain show [OPTIONS] NUMBER
+
+  Display the contents of note
+  NUMBER.
+
+<b>Options:</b>
+  <span class="c">--help</span>  Show this message and exit.</pre>
+      </div>
+    </article>
+  </div>
+
+  <div class="callout">
+    <b>The top-level help</b> is the map: <code>secondbrain --help</code> lists exactly these three, and
+    <code>--help</code> is the only option anywhere in the tool. Everything else is configured through the
+    environment — which is the next section.
+  </div>
+</section>
+
+<section class="wrap">
+  <p class="eyebrow">Three environment variables</p>
+  <h2>the knobs on the back<span class="tick">.</span></h2>
+  <p class="lede">Copy <code>.env.example</code> to <code>.env</code>, then load it explicitly with
+    <code>uv run --env-file .env secondbrain …</code> — it is never auto-loaded, so nothing changes behind your back.</p>
+
+  <div class="knobs">
+    <div class="knob">
+      <span class="var">SECONDBRAIN_DIR</span>
+      <span class="def">default · ~/secondbrain/</span>
+      <p>Where your notes live. Read fresh on every call, so pointing it somewhere else works per-command.</p>
+    </div>
+    <div class="knob">
+      <span class="var">LOG_LEVEL</span>
+      <span class="def">default · INFO</span>
+      <p>How chatty the console is. Set <code>DEBUG</code> to watch it choose directories and count files.</p>
+    </div>
+    <div class="knob">
+      <span class="var">LOG_FILE</span>
+      <span class="def">default · app.log in your notes dir</span>
+      <p>Always records at DEBUG, rotates at 50 KB, keeps one old copy. If it can&rsquo;t be opened, the command still runs.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <b>Every log line looks like this</b> — one compact pipe-delimited row, with the level squeezed down to a single letter
+    (T · D · I · S · W · E · C):
+<pre style="margin-top:.6rem">2026-08-02 09:14:07 | <span class="c">I</span> | secondbrain.cli:new:25 | Created note: /home/you/secondbrain/2026-08-02-cafe-ideas-for-monday.md</pre>
+  </div>
+</section>
+
+<section class="wrap">
+  <p class="eyebrow">Inside src/secondbrain</p>
+  <h2>five files, one job each<span class="tick">.</span></h2>
+  <p class="lede">Click any file to see what it&rsquo;s responsible for. The split is deliberate: the part that talks to you,
+    the part that thinks, and the part that keeps the diary.</p>
+
+  <div class="explorer">
+    <nav class="tree" aria-label="Source files">
+      <div class="tree-root">📁 src / secondbrain</div>
+      <ul id="tree" role="listbox" aria-label="Choose a source file"></ul>
+    </nav>
+    <div class="detail" id="detail" aria-live="polite"></div>
+  </div>
+</section>
+
+<footer class="wrap">
+  <p class="eyebrow">If you want to run it yourself</p>
+  <h2>from zero to first note<span class="tick">.</span></h2>
+  <div class="runs">
+    <div class="run"><span class="s">$</span><span>uv sync</span><span class="d">install everything</span></div>
+    <div class="run"><span class="s">$</span><span>uv run secondbrain new "My brilliant idea"</span><span class="d">your first note</span></div>
+    <div class="run"><span class="s">$</span><span>uv run secondbrain list</span><span class="d">see it there</span></div>
+    <div class="run"><span class="s">$</span><span>uv run secondbrain show 1</span><span class="d">read it back</span></div>
+    <div class="run"><span class="s">$</span><span>uv run python -m secondbrain --help</span><span class="d">same tool, module form</span></div>
+    <div class="run"><span class="s">$</span><span>uv run pytest --cov</span><span class="d">tests, 80% floor</span></div>
+    <div class="run"><span class="s">$</span><span>uv run python scripts/serve_docs.py</span><span class="d">docs, live preview</span></div>
+  </div>
+  <p class="sig">secondbrain 0.0.1 · Python 3.13 · Click + Loguru · notes are plain markdown you can read without this tool</p>
+</footer>
+
+<script>
+  // ---- the slug machine: mirrors slugify() in notes.py ----
+  const input = document.getElementById("titleInput");
+  const out = ["s1","s2","s3","s4","s5"].map(id => document.getElementById(id));
+
+  function stages(title){
+    const folded = title.normalize("NFKD").replace(/\p{Mn}/gu, "");
+    const lower  = folded.toLowerCase();
+    const clean  = lower.replace(/[^\p{L}\p{N}_\s-]/gu, "");
+    let dashed   = clean.replace(/[\s-]+/g, "-").replace(/^[-_]+|[-_]+$/g, "");
+    if (!dashed) dashed = "untitled";
+    return [folded, lower, clean, dashed];
+  }
+
+  function today(){
+    const d = new Date();
+    const p = n => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+  }
+
+  function render(){
+    const raw = input.value;
+    const [folded, lower, clean, dashed] = stages(raw);
+    const show = v => v.trim() === "" ? "—" : v;
+    out[0].textContent = show(folded);
+    out[1].textContent = show(lower);
+    out[2].textContent = show(clean);
+    out[3].textContent = show(dashed);
+    out[4].textContent = `${today()}-${dashed}.md`;
+  }
+
+  input.addEventListener("input", render);
+  document.querySelectorAll("[data-try]").forEach(b => {
+    b.addEventListener("click", () => {
+      input.value = b.dataset.try;
+      render();
+      input.focus();
+    });
+  });
+  render();
+
+  // ---- the file explorer ----
+  const FILES = [
+    {
+      name: "cli.py", lines: 80, tag: "CLI", color: "var(--pink)", ico: "CLI",
+      role: "The part that talks to you",
+      blurb: "Defines the Click command group and all three subcommands. It reads no files itself — it asks notes.py for everything and spends most of its lines on being a good citizen when things are missing: a friendly message when the notes directory doesn't exist, a real exit code when you ask for note 47 out of 3.",
+      symbols: [
+        ["cli()", "The group. Its first act is switching logging on, so every subcommand is instrumented for free."],
+        ["new(title)", "Asks notes.py to create the file, logs the path, echoes it so you can pipe it straight into your editor."],
+        ["list_notes()", "Globs *.md, sorts reverse — because filenames start with the date, newest lands first — and numbers them."],
+        ["show(number)", "Rebuilds that same list and prints the nth note. Out-of-range and empty-directory both exit 1 with a clear message."]
+      ]
+    },
+    {
+      name: "notes.py", lines: 76, tag: "CORE", color: "var(--aqua)", ico: "LOG",
+      role: "The part that thinks",
+      blurb: "All the actual note logic, and the only file with no dependency on Click or Loguru — you could import it from a web app tomorrow. This is where a messy human title becomes a tidy, collision-free filename.",
+      symbols: [
+        ["notes_dir()", "Resolves SECONDBRAIN_DIR (or ~/secondbrain). Read on every call, so the environment always wins."],
+        ["slugify(title)", "Folds Latin accents to ASCII but keeps other scripts intact, so 日本 stays 日本 instead of collapsing to 'untitled'."],
+        ["build_note_path()", "Composes date + slug, creates the directory, and appends -1, -2, … rather than ever overwriting a note."],
+        ["create_note()", "Writes '# Title' plus a second-precision timestamp, UTF-8, and returns the resolved path."],
+        ["read_note(path)", "Reads it back with the same UTF-8 encoding it was written with."]
+      ]
+    },
+    {
+      name: "app.py", lines: 68, tag: "LOGS", color: "var(--yellow)", ico: "LOG",
+      role: "The part that keeps the diary",
+      blurb: "Sets up Loguru: one stderr handler at your chosen level, one file handler always at DEBUG. The guiding rule is written into the docstring — logging must never be the reason a command fails, so a log file that can't be opened downgrades to a warning and the note still gets written.",
+      symbols: [
+        ["LOG_FORMAT", "The compact pipe-delimited line: time | level | module:function:line | message."],
+        ["LEVEL_ICONS", "Squeezes each level name down to one letter so the columns stay narrow."],
+        ["configure_logging()", "Removes Loguru's default handler, adds both of its own, and rotates the file at 50 KB keeping one backup."],
+        ["main()", "A @logger.catch-wrapped smoke test that just says hello — proof the logging setup works."]
+      ]
+    },
+    {
+      name: "__main__.py", lines: 4, tag: "ENTRY", color: "var(--aqua)", ico: "RUN",
+      role: "The second front door",
+      blurb: "Four lines that make `python -m secondbrain` behave exactly like the installed `secondbrain` command. Handy when the console script isn't on your PATH. It's excluded from coverage, since there's nothing in it to test.",
+      symbols: [
+        ["from … import cli", "Grabs the same Click group the installed entry point uses — one code path, two ways in."]
+      ]
+    },
+    {
+      name: "__init__.py", lines: 0, tag: "PKG", color: "var(--ink-faint)", ico: "PKG",
+      role: "Deliberately empty",
+      blurb: "Zero bytes. It marks the directory as a package and nothing more — no re-exports, no side effects at import time. Importing secondbrain costs you nothing.",
+      symbols: []
+    }
+  ];
+
+  const treeEl = document.getElementById("tree");
+  const detailEl = document.getElementById("detail");
+
+  FILES.forEach((f, i) => {
+    const li = document.createElement("li");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "file";
+    btn.style.setProperty("--fc", f.color);
+    btn.setAttribute("role", "option");
+    btn.setAttribute("aria-selected", i === 0 ? "true" : "false");
+    btn.innerHTML = `<span class="ico">${f.ico}</span><span>${f.name}</span><span class="lines">${f.lines} ln</span>`;
+    btn.addEventListener("click", () => select(i));
+    li.appendChild(btn);
+    treeEl.appendChild(li);
+  });
+
+  function select(i){
+    const f = FILES[i];
+    treeEl.querySelectorAll(".file").forEach((b, j) =>
+      b.setAttribute("aria-selected", j === i ? "true" : "false"));
+    detailEl.style.setProperty("--dc", f.color);
+    detailEl.innerHTML = `
+      <div class="detail-head">
+        <h3>${f.name}</h3>
+        <span class="badge">${f.tag}</span>
+      </div>
+      <p class="role">${f.role} · ${f.lines} lines</p>
+      <p class="blurb">${f.blurb}</p>
+      ${f.symbols.length ? `<ul class="symbols">${f.symbols.map(([s, d]) =>
+        `<li><span class="sym">${s}</span><span class="desc">${d}</span></li>`).join("")}</ul>` : ""}
+    `;
+  }
+  select(0);
+</script>
