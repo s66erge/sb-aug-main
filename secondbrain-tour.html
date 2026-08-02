@@ -762,25 +762,26 @@
   // ---- the file explorer ----
   const FILES = [
     {
-      name: "cli.py", lines: 80, tag: "CLI", color: "var(--pink)", ico: "CLI",
+      name: "cli.py", lines: 87, tag: "CLI", color: "var(--pink)", ico: "CLI",
       role: "The part that talks to you",
       blurb: "Defines the Click command group and all three subcommands. It reads no files itself — it asks notes.py for everything and spends most of its lines on being a good citizen when things are missing: a friendly message when the notes directory doesn't exist, a real exit code when you ask for note 47 out of 3.",
       symbols: [
         ["cli()", "The group. Its first act is switching logging on, so every subcommand is instrumented for free."],
-        ["new(title)", "Asks notes.py to create the file, logs the path, echoes it so you can pipe it straight into your editor."],
+        ["new(title)", "Turns a typed \\n back into a real newline, asks notes.py to create the file, logs the path, echoes it so you can pipe it straight into your editor."],
         ["list_notes()", "Globs *.md, sorts reverse — because filenames start with the date, newest lands first — and numbers them."],
         ["show(number)", "Rebuilds that same list and prints the nth note. Out-of-range and empty-directory both exit 1 with a clear message."]
       ]
     },
     {
-      name: "notes.py", lines: 76, tag: "CORE", color: "var(--aqua)", ico: "LOG",
+      name: "notes.py", lines: 107, tag: "CORE", color: "var(--aqua)", ico: "LOG",
       role: "The part that thinks",
       blurb: "All the actual note logic, and the only file with no dependency on Click or Loguru — you could import it from a web app tomorrow. This is where a messy human title becomes a tidy, collision-free filename.",
       symbols: [
         ["notes_dir()", "Resolves SECONDBRAIN_DIR (or ~/secondbrain). Read on every call, so the environment always wins."],
         ["slugify(title)", "Folds Latin accents to ASCII but keeps other scripts intact, so 日本 stays 日本 instead of collapsing to 'untitled'."],
+        ["split_title_body()", "Cuts the input at the first newline: line one is the title, the rest is the body — so a body can never reach the filename."],
         ["build_note_path()", "Composes date + slug, creates the directory, and appends -1, -2, … rather than ever overwriting a note."],
-        ["create_note()", "Writes '# Title' plus a second-precision timestamp, UTF-8, and returns the resolved path."],
+        ["create_note()", "Writes '# Title', then the body under a blank line if there is one, UTF-8, and returns the resolved path."],
         ["read_note(path)", "Reads it back with the same UTF-8 encoding it was written with."]
       ]
     },

@@ -32,6 +32,19 @@ Via the Python module:
 uv run python -m secondbrain new "My brilliant idea"
 ```
 
+The first line of the argument is the note title; anything after the first newline becomes the
+body (a literal `\n` is interpreted). Only the first line names the file:
+
+```bash
+uv run secondbrain new "hello\nworld"   # writes 2026-08-02-hello.md
+```
+
+```markdown
+# hello
+
+world
+```
+
 ## Environment Variables
 
 `.env.example` is the template for local configuration — copy it to `.env` for development:

@@ -30,6 +30,24 @@ Or as a Python module:
 uv run python -m secondbrain new "My brilliant idea"
 ```
 
+### Notes with a body
+
+The first line of the argument is the note title; everything after the first newline is the
+body. A literal `\n` is interpreted, so this works from any shell:
+
+```bash
+uv run secondbrain new "hello\nworld"
+```
+
+```markdown
+# hello
+
+world
+```
+
+Only the first line feeds the filename, so the note above lands in `2026-08-02-hello.md` —
+the body never leaks into the name. A single-line argument still produces just the heading.
+
 ## Environment Variables
 
 | Variable           | Default                       | Description                        |

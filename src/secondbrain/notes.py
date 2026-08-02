@@ -40,6 +40,22 @@ def slugify(title: str) -> str:
     return slug or "untitled"
 
 
+def split_title_body(text: str) -> tuple[str, str]:
+    """Split note input into its title and body on the first newline.
+
+    Only the first newline separates the two, so a multi-line body is kept
+    intact. A body that is empty or only whitespace counts as no body at all.
+
+    Args:
+        text: The raw note input, with real newlines.
+
+    Returns:
+        A `(title, body)` pair, both stripped of surrounding whitespace.
+    """
+    title, _, body = text.partition("\n")
+    return title.strip(), body.strip()
+
+
 def build_note_path(title: str, base_dir: Path, note_date: date) -> Path:
     """Build the full file path for a note, creating the directory if needed.
 
@@ -58,15 +74,30 @@ def build_note_path(title: str, base_dir: Path, note_date: date) -> Path:
 
 
 def create_note(
-    title: str,
+    text: str,
     base_dir: Path,
     now: datetime | None = None,
 ) -> Path:
-    """Create a markdown note file and return its absolute path."""
+    """Create a markdown note file and return its absolute path.
+
+    The first line of `text` becomes the heading and is the only source of the
+    filename slug; anything after the first newline is written as the body,
+    separated by a blank line. There is no timestamp line — the note date
+    already lives in the filename.
+
+    Args:
+        text: The note input. First line is the title, the rest is the body.
+        base_dir: Directory to write the note into, created if missing.
+        now: Timestamp supplying the filename date. Defaults to the current time.
+
+    Returns:
+        The resolved path of the note that was written.
+    """
     now = now or datetime.now()
+    title, body = split_title_body(text)
     path = build_note_path(title, base_dir, now.date())
-    timestamp = now.replace(microsecond=0).isoformat()
-    content = f"# {title}\n\n{timestamp}\n"
+    heading = f"# {title}".rstrip()
+    content = f"{heading}\n\n{body}\n" if body else f"{heading}\n"
     path.write_text(content, encoding="utf-8")
     return path.resolve()
 
