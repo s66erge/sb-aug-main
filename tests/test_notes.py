@@ -77,6 +77,9 @@ def test_slugify_keeps_distinct_non_latin_titles_distinct():
         ("  hello  \nworld", ("hello", "world")),
         ("\nworld", ("", "world")),
         ("", ("", "")),
+        ("hello\n    indented", ("hello", "    indented")),
+        ("hello\n    a\n    b", ("hello", "    a\n    b")),
+        ("hello\n\n\nworld\n\n", ("hello", "world")),
     ],
     ids=[
         "no_newline",
@@ -87,6 +90,9 @@ def test_slugify_keeps_distinct_non_latin_titles_distinct():
         "surrounding_whitespace_stripped",
         "empty_title",
         "empty_string",
+        "body_indentation_preserved",
+        "indented_block_preserved",
+        "blank_lines_around_body_dropped",
     ],
 )
 def test_split_title_body(text, expected):
@@ -205,6 +211,12 @@ def test_create_note_empty_title_with_body(tmp_path):
     path = create_note("\nworld", tmp_path, now=FIXED_NOW)
     assert "untitled" in path.name
     assert path.read_text() == "#\n\nworld\n"
+
+
+def test_create_note_indented_body_preserved(tmp_path):
+    """An indented code block must survive intact, first line included."""
+    path = create_note("Snippet\n    print(1)\n    print(2)", tmp_path, now=FIXED_NOW)
+    assert path.read_text() == "# Snippet\n\n    print(1)\n    print(2)\n"
 
 
 def test_create_note_unicode_body_roundtrips(tmp_path):

@@ -46,14 +46,20 @@ def split_title_body(text: str) -> tuple[str, str]:
     Only the first newline separates the two, so a multi-line body is kept
     intact. A body that is empty or only whitespace counts as no body at all.
 
+    Blank lines and trailing whitespace are trimmed from the body, but its
+    leading indentation is not — stripping that would turn the first line of an
+    indented code block into a paragraph while leaving the rest indented.
+
     Args:
         text: The raw note input, with real newlines.
 
     Returns:
-        A `(title, body)` pair, both stripped of surrounding whitespace.
+        A `(title, body)` pair. The title is stripped; the body keeps the
+        indentation of its first line.
     """
     title, _, body = text.partition("\n")
-    return title.strip(), body.strip()
+    body = body.strip("\n").rstrip()
+    return title.strip(), body if body.strip() else ""
 
 
 def build_note_path(title: str, base_dir: Path, note_date: date) -> Path:
