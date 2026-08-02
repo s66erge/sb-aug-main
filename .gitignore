@@ -227,3 +227,6 @@ htmlcov/
 .coverage
 .env
 .env.test
+
+# Claude Code — per-developer settings stay local; .claude/settings.json is shared
+.claude/settings.local.json
