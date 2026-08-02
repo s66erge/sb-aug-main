@@ -45,6 +45,9 @@ uv run secondbrain new "hello\nworld"   # writes 2026-08-02-hello.md
 world
 ```
 
+The `\n` substitution is unconditional and cannot be escaped, so a title meant to contain the
+characters `\` and `n` is split too — see [Notes with a body](docs/usage.md) for the details.
+
 ## Environment Variables
 
 `.env.example` is the template for local configuration — copy it to `.env` for development:

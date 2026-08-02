@@ -23,6 +23,12 @@ def new(title: str):
     The first line becomes the heading and names the file; anything after the
     first newline is written as the note body. A literal `\n` in the argument
     is interpreted as a newline, so `new "hello\nworld"` works from any shell.
+
+    That substitution is unconditional and cannot be escaped, so a title meant
+    to contain the characters `\` and `n` is split as well:
+    `new "Fix the \newline bug"` gives the heading `# Fix the` and the body
+    `ewline bug`. Neither doubling the backslash nor typing a real newline
+    avoids it; only `notes.create_note` takes such a title verbatim.
     """
     base_dir = notes_dir()
     logger.debug("Creating note in {}", base_dir)
