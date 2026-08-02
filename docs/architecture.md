@@ -39,6 +39,7 @@ flowchart LR
         direction TB
         ndir["<code>notes_dir</code>"]
         slug["<code>slugify</code>"]
+        split["<code>split_title_body</code>"]
         build["<code>build_note_path</code>"]
         create["<code>create_note</code>"]
         read["<code>read_note</code>"]
@@ -70,6 +71,7 @@ flowchart LR
     cmd_show --> ndir
     cmd_show --> read
 
+    create --> split
     create --> build
     build --> slug
     create --> notes_md
@@ -118,14 +120,14 @@ flowchart LR
 
     subgraph cmds["Subcommands"]
         direction TB
-        c_new["<b>new TITLE</b><br/>required string"]
+        c_new["<b>new TITLE</b><br/>required string<br/>first line heading, rest body"]
         c_list["<b>list</b><br/>no arguments"]
         c_show["<b>show NUMBER</b><br/>required int"]
     end
 
     subgraph behind["What happens behind them"]
         direction TB
-        b_new["slugify title<br/>build DATE-slug.md<br/>de-duplicate with -1, -2<br/>write heading + timestamp<br/>echo absolute path"]
+        b_new["split first line / body<br/>slugify title<br/>build DATE-slug.md<br/>de-duplicate with -1, -2<br/>write heading + body<br/>echo absolute path"]
         b_list["glob *.md<br/>sort reverse, newest first<br/>echo numbered list"]
         b_show["glob + sort<br/>index NUMBER - 1<br/>echo file contents"]
     end
@@ -195,7 +197,7 @@ flowchart LR
     subgraph readback["Read back"]
         direction TB
         u4["<code>secondbrain show 1</code>"]
-        r4["# My brilliant idea<br/>2026-08-02T18:20:14"]
+        r4["# My brilliant idea"]
     end
 
     dup{"same title<br/>same day?"}

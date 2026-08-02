@@ -30,6 +30,52 @@ Or as a Python module:
 uv run python -m secondbrain new "My brilliant idea"
 ```
 
+### Notes with a body
+
+The first line of the argument is the note title; everything after the first newline is the
+body. A literal `\n` is interpreted, so this works from any shell:
+
+```bash
+uv run secondbrain new "hello\nworld"
+```
+
+```markdown
+# hello
+
+world
+```
+
+Only the first line feeds the filename, so the note above lands in `2026-08-02-hello.md` —
+the body never leaks into the name. A single-line argument still produces just the heading.
+
+Indentation at the start of the body is preserved, so an indented code block survives intact.
+Blank lines around the body are trimmed, and a body that is only whitespace counts as no body.
+
+!!! warning "`\n` is always substituted, and cannot be escaped"
+    The substitution is unconditional, so a title meant to contain the two characters `\` and
+    `n` is split too — and the `n` is consumed:
+
+    ```bash
+    uv run secondbrain new "Fix the \newline bug"   # writes 2026-08-02-fix-the.md
+    ```
+
+    ```markdown
+    # Fix the
+
+    ewline bug
+    ```
+
+    There is no escape hatch: doubling the backslash does not help (`\\n` still contains
+    `\n`), and switching to a real newline does not either, since the substitution runs over
+    the whole argument regardless. A title containing a literal `\n` can currently only be
+    written through the Python API, which takes real newlines and substitutes nothing:
+
+    ```python
+    from secondbrain.notes import create_note
+
+    create_note(r"Fix the \newline bug", base_dir)
+    ```
+
 ## Environment Variables
 
 | Variable           | Default                       | Description                        |

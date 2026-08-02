@@ -69,12 +69,53 @@ def test_cli_new_file_content_has_heading(tmp_note_dir):
     assert lines[0] == "# My heading test"
 
 
-def test_cli_new_file_content_has_timestamp(tmp_note_dir):
+def test_cli_new_file_content_has_no_timestamp(tmp_note_dir):
     result = runner.invoke(cli, ["new", "Timestamp test"])
     assert result.exit_code == 0
     md_file = next(tmp_note_dir.glob("*.md"))
     text = md_file.read_text()
-    assert re.search(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", text)
+    assert not re.search(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", text)
+
+
+def test_cli_new_single_line_unchanged(tmp_note_dir):
+    result = runner.invoke(cli, ["new", "Test idea"])
+    assert result.exit_code == 0
+    md_file = next(tmp_note_dir.glob("*.md"))
+    assert md_file.read_text() == "# Test idea\n"
+
+
+# ---------------------------------------------------------------------------
+# new: title / body split
+# ---------------------------------------------------------------------------
+
+
+def test_cli_new_escaped_newline_splits_title_and_body(tmp_note_dir):
+    r"""Regression: argv delivers `\n` as two characters, so the CLI unescapes it."""
+    result = runner.invoke(cli, ["new", "hello\\nworld"])
+    assert result.exit_code == 0
+    files = list(tmp_note_dir.glob("*.md"))
+    assert len(files) == 1
+    assert files[0].name.endswith("-hello.md")
+    assert files[0].read_text() == "# hello\n\nworld\n"
+
+
+def test_cli_new_real_newline_splits_title_and_body(tmp_note_dir):
+    """A genuine newline (from `$'a\nb'` or a quoted multi-line string) works too."""
+    result = runner.invoke(cli, ["new", "hello\nworld"])
+    assert result.exit_code == 0
+    files = list(tmp_note_dir.glob("*.md"))
+    assert len(files) == 1
+    assert files[0].name.endswith("-hello.md")
+    assert files[0].read_text() == "# hello\n\nworld\n"
+
+
+def test_cli_new_body_not_in_filename(tmp_note_dir):
+    """The reported bug named the file `hellonworld`; the body must never leak in."""
+    result = runner.invoke(cli, ["new", "hello\\nworld"])
+    assert result.exit_code == 0
+    name = next(tmp_note_dir.glob("*.md")).name
+    assert "world" not in name
+    assert "hellonworld" not in name
 
 
 # ---------------------------------------------------------------------------

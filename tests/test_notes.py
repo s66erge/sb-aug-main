@@ -1,4 +1,4 @@
-"""Tests for the notes module (slugify, build_note_path, create_note)."""
+"""Tests for the notes module (slugify, split_title_body, build_note_path, create_note)."""
 
 from datetime import date, datetime
 from pathlib import Path
@@ -11,6 +11,7 @@ from secondbrain.notes import (
     notes_dir,
     read_note,
     slugify,
+    split_title_body,
 )
 
 # ---------------------------------------------------------------------------
@@ -58,6 +59,44 @@ def test_slugify(title, expected):
 def test_slugify_keeps_distinct_non_latin_titles_distinct():
     """Regression: non-Latin titles all collapsed to `untitled` and collided."""
     assert slugify("日本の考え") != slugify("キャッシュの話")
+
+
+# ---------------------------------------------------------------------------
+# split_title_body
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("hello", ("hello", "")),
+        ("hello\nworld", ("hello", "world")),
+        ("hello\nline1\nline2", ("hello", "line1\nline2")),
+        ("hello\n", ("hello", "")),
+        ("hello\n   \n", ("hello", "")),
+        ("  hello  \nworld", ("hello", "world")),
+        ("\nworld", ("", "world")),
+        ("", ("", "")),
+        ("hello\n    indented", ("hello", "    indented")),
+        ("hello\n    a\n    b", ("hello", "    a\n    b")),
+        ("hello\n\n\nworld\n\n", ("hello", "world")),
+    ],
+    ids=[
+        "no_newline",
+        "title_and_body",
+        "only_first_newline_splits",
+        "trailing_newline",
+        "whitespace_only_body",
+        "surrounding_whitespace_stripped",
+        "empty_title",
+        "empty_string",
+        "body_indentation_preserved",
+        "indented_block_preserved",
+        "blank_lines_around_body_dropped",
+    ],
+)
+def test_split_title_body(text, expected):
+    assert split_title_body(text) == expected
 
 
 # ---------------------------------------------------------------------------
@@ -118,10 +157,10 @@ def test_create_note_content_heading(tmp_path):
     assert lines[0] == "# Test idea"
 
 
-def test_create_note_content_timestamp(tmp_path):
+def test_create_note_no_timestamp(tmp_path):
+    """The note date lives in the filename; a timestamp line is just noise."""
     path = create_note("Test idea", tmp_path, now=FIXED_NOW)
-    text = path.read_text()
-    assert "2026-03-22T14:30:00" in text
+    assert "2026-03-22T14:30:00" not in path.read_text()
 
 
 def test_create_note_no_yaml_frontmatter(tmp_path):
@@ -140,6 +179,50 @@ def test_create_note_creates_directory(tmp_path):
     path = create_note("Test idea", nested, now=FIXED_NOW)
     assert nested.is_dir()
     assert path.is_file()
+
+
+# ---------------------------------------------------------------------------
+# title / body split
+# ---------------------------------------------------------------------------
+
+
+def test_create_note_body_written_under_heading(tmp_path):
+    path = create_note("hello\nworld", tmp_path, now=FIXED_NOW)
+    assert path.read_text() == "# hello\n\nworld\n"
+
+
+def test_create_note_single_line_has_no_body(tmp_path):
+    path = create_note("hello", tmp_path, now=FIXED_NOW)
+    assert path.read_text() == "# hello\n"
+
+
+def test_create_note_body_excluded_from_filename(tmp_path):
+    path = create_note("hello\nworld", tmp_path, now=FIXED_NOW)
+    assert path.name == "2026-03-22-hello.md"
+    assert "world" not in path.name
+
+
+def test_create_note_multiline_body_preserved(tmp_path):
+    path = create_note("t\na\nb", tmp_path, now=FIXED_NOW)
+    assert path.read_text() == "# t\n\na\nb\n"
+
+
+def test_create_note_empty_title_with_body(tmp_path):
+    path = create_note("\nworld", tmp_path, now=FIXED_NOW)
+    assert "untitled" in path.name
+    assert path.read_text() == "#\n\nworld\n"
+
+
+def test_create_note_indented_body_preserved(tmp_path):
+    """An indented code block must survive intact, first line included."""
+    path = create_note("Snippet\n    print(1)\n    print(2)", tmp_path, now=FIXED_NOW)
+    assert path.read_text() == "# Snippet\n\n    print(1)\n    print(2)\n"
+
+
+def test_create_note_unicode_body_roundtrips(tmp_path):
+    path = create_note("Café\n日本のメモ", tmp_path, now=FIXED_NOW)
+    assert path.name == "2026-03-22-cafe.md"
+    assert read_note(path) == "# Café\n\n日本のメモ\n"
 
 
 # ---------------------------------------------------------------------------
